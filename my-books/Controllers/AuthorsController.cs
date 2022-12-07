@@ -34,6 +34,17 @@ namespace my_books.Controllers
             return Ok(author);
         }
 
+        [HttpGet("get-author-with-books-by-id/{id}")]
+        public IActionResult GetAuthorWithBooksById(int id)
+        {
+            var author = _service.GetAuthorWithBooks(id);
+            if (author is null)
+            {
+                return NotFound();
+            }
+            return Ok(author);
+        }
+
         [HttpPost("add-author")]
         public IActionResult AddAuthor([FromBody] AuthorVM author)
         {

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using my_books.Data.Models;
 using my_books.Data.ViewModels;
+using System.Security.Cryptography.Xml;
 using System.Threading;
 
 namespace my_books.Data.Services
@@ -14,22 +15,52 @@ namespace my_books.Data.Services
             _context = context;
         }
 
-        public List<Book> GetAllBooks()
+        public List<BookWithAuthorsVM> GetAllBooks()
         {
-            var books = _context.Books
-                .Include(p => p.Publisher)
-                .Include(ba => ba.Books_Authors).ThenInclude(a => a.Author)
-                .ToList();
-            return books;
+            //var books = _context.Books
+            //    .Include(p => p.Publisher)
+            //    .Include(ba => ba.Books_Authors).ThenInclude(a => a.Author)
+            //    .ToList();
+            //return books;
+
+            var _booksWithAuthors = _context.Books.Select(book => new BookWithAuthorsVM 
+            {
+                Title = book.Title,
+                Description = book.Description,
+                IsRead = book.IsRead,
+                DateRead = book.IsRead ? book.DateRead.Value : null,
+                Rate = book.IsRead ? book.Rate.Value : null,
+                Genre = book.Genre,
+                CoverUrl = book.CoverUrl,
+                PublisherName = book.Publisher.Name,
+                AuthorNames = book.Books_Authors.Select(x => x.Author.FullName).ToList()
+            }).ToList();
+
+            return _booksWithAuthors;
         }
 
-        public Book GetBookById(int id)  
+        public BookWithAuthorsVM GetBookById(int id)  
         {
-            var book = _context.Books
-                .Include(n => n.Publisher)
-                .Include(ba => ba.Books_Authors).ThenInclude(a => a.Author)
-                .FirstOrDefault(n => n.Id == id);
-            return book;
+            //var book = _context.Books
+            //    .Include(n => n.Publisher)
+            //    .Include(ba => ba.Books_Authors).ThenInclude(a => a.Author)
+            //    .FirstOrDefault(n => n.Id == id);
+            //return book;
+
+            var _bookWithAuthors = _context.Books.Where(n => n.Id == id).Select(book => new BookWithAuthorsVM
+            {
+                Title = book.Title,
+                Description = book.Description,
+                IsRead = book.IsRead,
+                DateRead = book.IsRead ? book.DateRead.Value : null,
+                Rate = book.IsRead ? book.Rate.Value : null,
+                Genre = book.Genre,
+                CoverUrl = book.CoverUrl,
+                PublisherName = book.Publisher.Name,
+                AuthorNames = book.Books_Authors.Select(n => n.Author.FullName).ToList()
+            }).FirstOrDefault();
+
+            return _bookWithAuthors;
         }
 
         public void AddBook(BookVM book)

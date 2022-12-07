@@ -18,6 +18,21 @@ namespace my_books.Data.Services
         public Publisher GetPublisherById(int id) => _context.Publishers.FirstOrDefault(n => n.Id == id);
 
 
+        public PublisherWithBookAndAuthorsVM GetPublisherWithBookAndAuthor(int id)
+        {
+            var publisherWithBookAndAuthor = _context.Publishers.Where(n => n.Id == id).Select(publisher => new PublisherWithBookAndAuthorsVM
+            {
+                Name = publisher.Name,
+                BookAuthors = publisher.Books.Select(x => new BookAuthorsVM
+                {
+                    BookName = x.Title,
+                    BookAuthors = x.Books_Authors.Select(k => k.Author.FullName).ToList()
+                }).ToList()
+            }).FirstOrDefault();
+
+            return publisherWithBookAndAuthor;
+        }
+
 
         public void AddPublisher(PublisherVM publisher)
         {
